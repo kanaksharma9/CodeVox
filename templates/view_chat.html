@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat History - {{ timestamp }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style3.css') }}">
+</head>
+<body>
+  <div class="nav-buttons">
+    <a href="{{ url_for('chat') }}" class="nav-button">Back to Chat</a>
+    <a href="{{ url_for('logout') }}" class="nav-button">Logout</a>
+  </div>
+
+  <header class="header">
+    <h1 class="title">Chat History</h1>
+    <p class="subtitle">Prompt from {{ timestamp }}</p>
+  </header>
+
+  <div class="container">
+    <h2>Prompt:</h2>
+    <p class="text">{{ prompt }}</p>
+
+    <h2>Generated Code:</h2>
+    <pre>{{ result }}</pre>
+
+    <h2>Preview:</h2>
+    <div class="preview-container">
+      <iframe id="preview-iframe" sandbox="allow-scripts allow-popups allow-same-origin"></iframe>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const result = {{ result | tojson }};
+      const codeMatch = result.match(/```([\w-]+)\n([\s\S]*?)\n```/);
+      let previewContent = '';
+
+      if (codeMatch && codeMatch[2]) {
+        const language = codeMatch[1].toLowerCase();
+        const code = codeMatch[2];
+
+        if (language === "html") {
+          previewContent = code.includes("<html") 
+            ? code 
+            : `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview</title></head><body>${code}</body></html>`;
+        } else {
+          previewContent = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <title>Preview - ${language}</title>
+              <style>
+                body { font-family: "Poppins", sans-serif; padding: 20px; background: #242424; color: #E3E3E3; }
+                pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+              </style>
+            </head>
+            <body>
+              <pre>${code}</pre>
+            </body>
+            </html>
+          `;
+        }
+      } else {
+        previewContent = `
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Preview</title>
+            <style>
+              body { font-family: "Poppins", sans-serif; padding: 20px; background: #242424; color: #E3E3E3; }
+              pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); white-space: pre-wrap; }
+            </style>
+          </head>
+          <body>
+            <pre>${result}</pre>
+          </body>
+          </html>
+        `;
+      }
+
+      const iframe = document.getElementById('preview-iframe');
+      iframe.srcdoc = previewContent.replace(/"/g, '"');
+    });
+  </script>
+</body>
+</html>

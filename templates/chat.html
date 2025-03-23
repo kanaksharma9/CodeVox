@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeVox - Chat</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+<body>
+  <div class="nav-buttons">
+    {% if 'user_id' not in session %}
+      <a href="{{ url_for('login') }}" class="nav-button">Login</a>
+      <a href="{{ url_for('register') }}" class="nav-button">Register</a>
+    {% else %}
+      <button id="history-toggle" class="nav-button">Chat History</button>
+      <a href="{{ url_for('logout') }}" class="nav-button">Logout</a>
+    {% endif %}
+  </div>
+
+  {% if 'user_id' in session %}
+    <div id="history-box" class="history-box" style="display: none;">
+      <div class="history-content">
+        {% for id, prompt, timestamp in history %}
+          <a href="{{ url_for('view_chat', chat_id=id) }}" class="history-entry">
+            <div class="message incoming">
+              <div class="message-content">
+                <div class="text">{{ prompt[:50] if prompt else "No prompt" }}{% if prompt and prompt|length > 50 %}...{% endif %}<br><small>{{ timestamp }}</small></div>
+              </div>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <header class="header">
+    <h1 class="title">CodeVox</h1>
+    <p class="subtitle">Use your voice to generate code!</p>
+  </header>
+
+  <div class="chat-list">
+  </div>
+
+  <div class="voice-area">
+    <span id="voice-input-button" class="mic-button material-symbols-rounded">mic</span>
+  </div>
+
+  <script src="{{ url_for('static', filename='script2.js') }}"></script>
+  <script>
+    const historyToggle = document.getElementById('history-toggle');
+    const historyBox = document.getElementById('history-box');
+    if (historyToggle && historyBox) {
+      historyToggle.addEventListener('click', () => {
+        historyBox.style.display = historyBox.style.display === 'none' ? 'block' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>

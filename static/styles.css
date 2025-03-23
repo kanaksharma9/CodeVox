@@ -1,0 +1,387 @@
+
+@import url('https://fonts.googleapis.com/css?family=Raleway:900');
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #757575;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    --s: 200px; /* control the size */
+    --c1: #1d1d1d;
+    --c2: #4e4f51;
+    --c3: #3c3c3c;
+  
+    background: repeating-conic-gradient(
+          from 30deg,
+          #0000 0 120deg,
+          var(--c3) 0 180deg
+        )
+        calc(0.5 * var(--s)) calc(0.5 * var(--s) * 0.577),
+      repeating-conic-gradient(
+        from 30deg,
+        var(--c1) 0 60deg,
+        var(--c2) 0 120deg,
+        var(--c3) 0 180deg
+      );
+    background-size: var(--s) calc(var(--s) * 0.577);
+}
+.wrapper {
+    width: 100%;
+    height: 100%;
+    --s: 200px; /* control the size */
+    --c1: #1d1d1d;
+    --c2: #4e4f51;
+    --c3: #3c3c3c;
+  
+    background: repeating-conic-gradient(
+          from 30deg,
+          #0000 0 120deg,
+          var(--c3) 0 180deg
+        )
+        calc(0.5 * var(--s)) calc(0.5 * var(--s) * 0.577),
+      repeating-conic-gradient(
+        from 30deg,
+        var(--c1) 0 60deg,
+        var(--c2) 0 120deg,
+        var(--c3) 0 180deg
+      );
+    background-size: var(--s) calc(var(--s) * 0.577);
+  display: flex;
+  flex-direction: row;
+  background-color: #424242;
+  .text-overlay {
+    position: absolute;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    .header {
+      width: calc(900px - 20px);
+      padding: 5px 10px;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      #logo {
+        font-size: 19px;
+        font-family: sans-serif;
+        letter-spacing: 0.5em;
+        border: 2px solid white;
+        padding: 5px 2px 5px 10px;
+        margin-left: 10px;
+      }
+      #nav-menu {
+        width: 200px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        overflow: hidden;
+        visibility: hidden;
+        flex: 0.6;
+        opacity: 0;
+        transition: all 0.2s ease-in;
+        .nav-link {
+          text-transform: uppercase;
+          text-decoration: none;
+          font-size: 15px;
+          font-family: helvetica;
+          font-weight: bold;
+          color: #424242;        
+          margin-left: 30px;
+          margin-right: 30px;
+          &:hover {
+            text-decoration: underline;
+            color: white;
+          }
+        }
+      }
+      .fa-search {
+        position: relative;
+        left: 70px;
+      }
+      .fa-bars {
+        cursor: pointer;
+        color: white;
+      }
+    }
+    .main-content {
+      padding: 0 10px;        
+      font-family: Raleway;
+      margin-left: 10px;
+      overflow: hidden;
+      #main-header {
+        margin-bottom: 0px;
+        text-transform: uppercase;
+        font-size: 100px;
+        color: white;
+        font-weight: bold;
+        letter-spacing: 0.2em;
+        position: relative;
+        top: 180px;
+        transition: all 0.5s ease-in-out;
+      }
+      #sub-heading {
+        font-size: 32px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: white;
+        margin-top: 0;
+        position: relative;
+        top: 70px;
+        transition: all 0.5s ease-in-out;
+      }
+    }
+  }
+  .container1,
+  .container2,
+  .container3 {
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+    .image {
+      width: 110%;
+      height: 100%;
+    }
+  }
+  .container1 {
+    flex: 1;
+  }
+  .container2 {
+    flex: 1.3;
+    overflow: hidden;
+    .image {
+      position: relative;
+      left: 450px;
+      transition: left 0.5s ease-out;
+    }
+  }
+  .container3 {
+    flex: 0.9;
+    display: flex;
+    flex-direction: column;
+    .container4 {
+      flex: 0.7;
+      .image {
+        height: 100%;
+        position: relative;
+        left: 260px;
+        transition: left 0.5s ease-out;
+      }
+    }
+    .container5 {
+      height: 100%;
+      background-color: white;
+      flex: 0.3;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      font-family: helvetica;
+      text-transform: uppercase;
+      position: relative;
+      left: 260px;        
+      transition: left 0.5s ease-out;
+      .text-container {
+        .heading {
+          width: 100%;
+          padding: 0;
+          margin: 0;
+          position: relative;
+          top: 45px;
+          letter-spacing: 0.2em;
+          transition: top 0.6s ease-in;
+        }
+      }
+    }
+  }
+}
+.button {
+    --black-700: hsla(0 0% 12% / 1);
+    --border_radius: 9999px;
+    --transtion: 0.3s ease-in-out;
+    --offset: 2px;
+  
+    cursor: pointer;
+    position: relative;
+  
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  
+    transform-origin: center;
+  
+    padding: 1rem 2rem;
+    background-color: transparent;
+  
+    border: none;
+    border-radius: var(--border_radius);
+    transform: scale(calc(1 + (var(--active, 0) * 0.1)));
+  
+    transition: transform var(--transtion);
+  }
+  
+  .button::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  
+    width: 100%;
+    height: 100%;
+    background-color: var(--black-700);
+  
+    border-radius: var(--border_radius);
+    box-shadow: inset 0 0.5px hsl(0, 0%, 100%), inset 0 -1px 2px 0 hsl(0, 0%, 0%),
+      0px 4px 10px -4px hsla(0 0% 0% / calc(1 - var(--active, 0))),
+      0 0 0 calc(var(--active, 0) * 0.375rem) hsl(260 97% 50% / 0.75);
+  
+    transition: all var(--transtion);
+    z-index: 0;
+  }
+  
+  .button::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  
+    width: 100%;
+    height: 100%;
+    background-color: hsla(260 97% 61% / 0.75);
+    background-image: radial-gradient(
+        at 51% 89%,
+        hsla(266, 45%, 74%, 1) 0px,
+        transparent 50%
+      ),
+      radial-gradient(at 100% 100%, hsla(266, 36%, 60%, 1) 0px, transparent 50%),
+      radial-gradient(at 22% 91%, hsla(266, 36%, 60%, 1) 0px, transparent 50%);
+    background-position: top;
+  
+    opacity: var(--active, 0);
+    border-radius: var(--border_radius);
+    transition: opacity var(--transtion);
+    z-index: 2;
+  }
+  
+  .button:is(:hover, :focus-visible) {
+    --active: 1;
+  }
+  .button:active {
+    transform: scale(1);
+  }
+  .button .a{
+    color: white;
+  }
+  .button .dots_border {
+    --size_border: calc(100% + 2px);
+  
+    overflow: hidden;
+  
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  
+    width: var(--size_border);
+    height: var(--size_border);
+    background-color: transparent;
+  
+    border-radius: var(--border_radius);
+    z-index: -10;
+  }
+  
+  .button .dots_border::before {
+    content: "";
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transform-origin: left;
+    transform: rotate(0deg);
+  
+    width: 100%;
+    height: 2rem;
+    background-color: white;
+  
+    mask: linear-gradient(transparent 0%, white 120%);
+    animation: rotate 2s linear infinite;
+  }
+  
+  @keyframes rotate {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .button .sparkle {
+    position: relative;
+    z-index: 10;
+  
+    width: 1.75rem;
+  }
+  
+  .button .sparkle .path {
+    fill: currentColor;
+    stroke: currentColor;
+  
+    transform-origin: center;
+  
+    color: hsl(0, 0%, 100%);
+  }
+  
+  .button:is(:hover, :focus) .sparkle .path {
+    animation: path 1.5s linear 0.5s infinite;
+  }
+  
+  .button .sparkle .path:nth-child(1) {
+    --scale_path_1: 1.2;
+  }
+  .button .sparkle .path:nth-child(2) {
+    --scale_path_2: 1.2;
+  }
+  .button .sparkle .path:nth-child(3) {
+    --scale_path_3: 1.2;
+  }
+  
+  @keyframes path {
+    0%,
+    34%,
+    71%,
+    100% {
+      transform: scale(1);
+    }
+    17% {
+      transform: scale(var(--scale_path_1, 1));
+    }
+    49% {
+      transform: scale(var(--scale_path_2, 1));
+    }
+    83% {
+      transform: scale(var(--scale_path_3, 1));
+    }
+  }
+  
+  .button .text_button {
+    position: relative;
+    z-index: 10;
+  
+    background-image: linear-gradient(
+      90deg,
+      hsla(0 0% 100% / 1) 0%,
+      hsla(0 0% 100% / var(--active, 0)) 120%
+    );
+    background-clip: text;
+  
+    font-size: 1rem;
+    color: transparent;
+  }
+  
