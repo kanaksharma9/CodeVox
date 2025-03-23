@@ -4,11 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     const chatContainer = document.querySelector(".chat-list");
     const micButton = document.querySelector("#voice-input-button");
-    const textInput = document.querySelector("#text-input");
-    const textSubmit = document.querySelector("#text-submit");
     const historyBox = document.getElementById("history-box");
 
-    if (!chatContainer || !micButton || !textSubmit) {
+    if (!chatContainer || !micButton) {
       console.error("Error: Required elements not found in the DOM.");
       return;
     }
@@ -19,9 +17,11 @@ document.addEventListener("DOMContentLoaded", () => {
       recognition.continuous = false;
       recognition.lang = "en-US";
     } else {
-      console.warn("Speech Recognition not supported. Using text input only.");
+      console.error("Speech Recognition API not supported in this browser.");
+      alert("Your browser doesn’t support speech recognition. Try Chrome or Edge.");
       micButton.disabled = true;
       micButton.title = "Speech not supported in this browser";
+      return;
     }
 
     let isRecognitionActive = false;
@@ -99,13 +99,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (codeMatch && codeMatch[2]) {
           const language = codeMatch[1].toLowerCase();
           let code = codeMatch[2];
-          
+
           // Decode URL-encoded content if present
           if (code.includes('%')) {
             try {
               code = decodeURIComponent(code);
             } catch (e) {
               console.error("Failed to decode URI component:", e);
+              code = codeMatch[2]; // Fallback to raw code
             }
           }
 
@@ -147,8 +148,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (previewContent) {
           const previewWindow = document.createElement("div");
           previewWindow.classList.add("preview-window");
-          // Escape quotes properly for srcdoc
-          const escapedContent = previewContent.replace(/"/g, '&quot;');
+          // Properly escape special characters for srcdoc
+          const escapedContent = previewContent
+            .replace(/&/g, "&amp;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            // Reverse decodeURIComponent effects after escaping
+            .replace(/%20/g, " ")
+            .replace(/%3C/g, "<")
+            .replace(/%3E/g, ">")
+            .replace(/%22/g, "\"");
           previewWindow.innerHTML = `
             <div class="preview-content">
               <button class="close-preview">X</button>
@@ -171,23 +182,25 @@ document.addEventListener("DOMContentLoaded", () => {
         .replace(/#.*$/gm, '<span class="comment">$&</span>');
     }
 
-    if (recognition) {
-      micButton.addEventListener("click", () => {
-        if (!isRecognitionActive) {
-          try {
-            recognition.start();
-            micButton.classList.add("listening");
-            isRecognitionActive = true;
-            recognitionTimeout = setTimeout(() => recognition.stop(), 5000);
-          } catch (e) {
-            console.error("Failed to start recognition:", e);
-            alert("Microphone access denied or unavailable. Check permissions and network.");
-            micButton.classList.remove("listening");
-            isRecognitionActive = false;
-          }
+    micButton.addEventListener("click", () => {
+      if (!isRecognitionActive && recognition) {
+        try {
+          recognition.start();
+          micButton.classList.add("listening");
+          isRecognitionActive = true;
+          recognitionTimeout = setTimeout(() => {
+            recognition.stop();
+          }, 5000); // Stop after 5 seconds if no speech
+        } catch (e) {
+          console.error("Failed to start recognition:", e);
+          alert("Microphone access denied or unavailable. Please check permissions.");
+          micButton.classList.remove("listening");
+          isRecognitionActive = false;
         }
-      });
+      }
+    });
 
+    if (recognition) {
       recognition.onresult = (event) => {
         micButton.classList.remove("listening");
         isRecognitionActive = false;
@@ -207,20 +220,19 @@ document.addEventListener("DOMContentLoaded", () => {
         let errorMessage = "Speech recognition failed: ";
         switch (event.error) {
           case "network":
-            errorMessage += "Network issue. Check your connection or try text input.";
+            errorMessage += "Network issue. Check your internet connection.";
             break;
           case "not-allowed":
           case "service-not-allowed":
-            errorMessage += "Microphone access denied. Grant permissions.";
+            errorMessage += "Microphone access denied. Please grant permissions.";
             break;
           case "no-speech":
-            errorMessage += "No speech detected. Speak louder or closer.";
+            errorMessage += "No speech detected. Try speaking louder or closer.";
             break;
           default:
             errorMessage += event.error;
         }
         alert(errorMessage);
-        recognition.stop();
       };
 
       recognition.onend = () => {
@@ -230,22 +242,5 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Speech recognition ended.");
       };
     }
-
-    textSubmit.addEventListener("click", () => {
-      const message = textInput.value.trim();
-      if (message) {
-        const userMessageDiv = createMessageElement(message, "outgoing");
-        chatContainer.appendChild(userMessageDiv);
-        chatContainer.scrollTo(0, chatContainer.scrollHeight);
-        fetchGeminiResponse(message);
-        textInput.value = "";
-      }
-    });
-
-    textInput.addEventListener("keypress", (event) => {
-      if (event.key === "Enter") {
-        textSubmit.click();
-      }
-    });
   }, 100);
 });
