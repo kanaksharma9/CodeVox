@@ -362,3 +362,15 @@ body.hide-header .header {
   text-align: center;
   margin-top: 1rem;
 }
+.nav-link {
+  color: #E3E3E3;
+  text-align: center;
+  margin-top: 15px;
+}
+.nav-link a {
+  color: #50fa7b; /* A bright accent color from your theme */
+  text-decoration: none;
+}
+.nav-link a:hover {
+  text-decoration: underline;
+}
