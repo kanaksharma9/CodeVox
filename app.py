@@ -27,7 +27,6 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Initialize database on startup
 with app.app_context():
     init_db()
 
@@ -57,6 +56,20 @@ def chat():
     history = c.fetchall()
     conn.close()
     return render_template('chat.html', history=history)
+
+@app.route('/chat/<int:chat_id>')
+def view_chat(chat_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("SELECT prompt, result, timestamp FROM chat_history WHERE id = ? AND user_id = ?",
+              (chat_id, session['user_id']))
+    chat = c.fetchone()
+    conn.close()
+    if not chat:
+        return "Chat not found or unauthorized", 404
+    return render_template('view_chat.html', prompt=chat[0], result=chat[1], timestamp=chat[2])
 
 @app.route('/chat/history', methods=['GET'])
 def get_history():
