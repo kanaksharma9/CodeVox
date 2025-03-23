@@ -34,13 +34,13 @@ body {
 
 .header, .chat-list, .voice-area {
   margin: 0 auto;
-  width: 100%;
-  max-width: 980px; /* Caps width but allows shrinking */
-  padding: 0 clamp(0.5rem, 2vw, 1rem); /* Responsive padding */
+  max-width: 980px;
 }
 
 .header {
-  margin-top: clamp(2vh, 6vh, 10vh); /* Scales with viewport height */
+  margin-top: 6vh;
+  padding: 1rem;
+  overflow-x: hidden;
 }
 
 body.hide-header .header {
@@ -51,25 +51,25 @@ body.hide-header .header {
 .header :where(.title, .subtitle) {
   color: var(--text-color);
   font-weight: 500;
-  line-height: clamp(2rem, 8vw, 4rem);
+  line-height: 4rem;
 }
 
 .header .title {
   width: fit-content;
-  font-size: clamp(1.5rem, 6vw, 3rem);
+  font-size: 3rem;
+  background-clip: text;
   background: linear-gradient(to right, #4285f4, #d96570);
   -webkit-background-clip: text;
-  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .header .subtitle {
-  font-size: clamp(1.2rem, 5vw, 2.6rem);
+  font-size: 2.6rem;
   color: var(--subheading-color);
 }
 
 .chat-list {
-  padding: clamp(1rem, 4vw, 2rem) clamp(0.5rem, 2vw, 1rem) clamp(6rem, 20vw, 12rem);
+  padding: 2rem 1rem 12rem;
   flex: 1;
   overflow-y: auto;
   scrollbar-color: #999 transparent;
@@ -78,7 +78,7 @@ body.hide-header .header {
 
 .chat-list .message {
   display: flex;
-  margin: clamp(0.75rem, 3vw, 1.5rem) 0;
+  margin: 1.5rem 0;
   animation: slideIn 0.3s ease;
 }
 
@@ -93,9 +93,9 @@ body.hide-header .header {
 .chat-list .message .message-content {
   display: flex;
   align-items: flex-start;
-  gap: clamp(0.5rem, 2vw, 1rem);
+  gap: 1rem;
   max-width: 80%;
-  padding: clamp(0.5rem, 2vw, 1rem) clamp(0.75rem, 3vw, 1.5rem);
+  padding: 1rem 1.5rem;
   border-radius: 12px;
   background: var(--secondary-color);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -107,8 +107,8 @@ body.hide-header .header {
 }
 
 .chat-list .message .avatar {
-  width: clamp(30px, 8vw, 40px);
-  height: clamp(30px, 8vw, 40px);
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
 }
@@ -118,7 +118,6 @@ body.hide-header .header {
   white-space: pre-wrap;
   word-wrap: break-word;
   max-width: 100%;
-  font-size: clamp(0.9rem, 3vw, 1rem);
 }
 
 .chat-list .message.error .text {
@@ -129,8 +128,7 @@ body.hide-header .header {
   position: fixed;
   left: 0;
   bottom: 0;
-  width: 100%;
-  padding: clamp(0.5rem, 2vw, 1rem);
+  padding: 1rem;
   background: var(--primary-color);
   text-align: center;
   display: flex;
@@ -138,18 +136,18 @@ body.hide-header .header {
 }
 
 .voice-area .mic-button {
-  width: clamp(40px, 12vw, 60px);
-  height: clamp(40px, 12vw, 60px);
+  width: 60px;
+  height: 60px;
   cursor: pointer;
   border-radius: 50%;
   display: flex;
-  font-size: clamp(1.2rem, 5vw, 2rem);
+  font-size: 2rem;
   color: var(--text-color);
   align-items: center;
   justify-content: center;
   background: var(--secondary-color);
   transition: 0.2s ease;
-  flex-shrink: 0;
+  flex-shrink: 0; /* Fixed mic widening issue */
 }
 
 .voice-area .mic-button:hover {
@@ -168,12 +166,11 @@ body.hide-header .header {
   left: 50%;
   transform: translate(-50%, -50%);
   background: var(--secondary-color);
-  padding: clamp(10px, 3vw, 20px);
+  padding: 20px;
   border-radius: 8px;
   box-shadow: 0 0 20px rgba(0,0,0,0.3);
   z-index: 1000;
-  width: 90%; /* Responsive width */
-  max-width: 1000px; /* Cap for larger screens */
+  max-width: 80%;
   max-height: 80vh;
   overflow-y: auto;
 }
@@ -183,8 +180,8 @@ body.hide-header .header {
 }
 
 .preview-content iframe {
-  width: 100%; /* Full width of container */
-  height: clamp(300px, 80vh, 1000px); /* Responsive height */
+  width: 1000px;
+  min-height: 1000px;
   border: none;
   border-radius: 4px;
   background: white;
@@ -195,8 +192,8 @@ body.hide-header .header {
   top: -10px;
   right: -10px;
   padding: 5px;
-  width: clamp(20px, 6vw, 30px);
-  height: clamp(20px, 6vw, 30px);
+  width: 30px;
+  height: 30px;
   background: #ff5252;
   color: white;
   border: none;
@@ -205,7 +202,6 @@ body.hide-header .header {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(12px, 3vw, 16px);
 }
 
 @keyframes pulse {
@@ -219,17 +215,38 @@ body.hide-header .header {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@media (max-width: 768px) {
+  .header :is(.title, .subtitle) {
+    font-size: 2rem;
+    line-height: 2.6rem;
+  }
+
+  .header .subtitle {
+    font-size: 1.7rem;
+  }
+
+  .voice-area .mic-button {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+
+  .chat-list .message .message-content {
+    max-width: 90%;
+  }
+}
+
 /* Navigation Buttons */
 .nav-buttons {
   position: absolute;
-  top: clamp(5px, 2vw, 10px);
-  right: clamp(5px, 2vw, 10px);
+  top: 10px;
+  right: 10px;
   display: flex;
-  gap: clamp(5px, 2vw, 10px);
+  gap: 10px;
 }
 
 .nav-button {
-  padding: clamp(4px, 1.5vw, 8px) clamp(8px, 2vw, 16px);
+  padding: 8px 16px;
   background: var(--secondary-color);
   color: var(--text-color);
   text-decoration: none;
@@ -237,7 +254,6 @@ body.hide-header .header {
   transition: 0.2s ease;
   border: none;
   cursor: pointer;
-  font-size: clamp(12px, 3vw, 16px);
 }
 
 .nav-button:hover {
@@ -247,39 +263,37 @@ body.hide-header .header {
 /* Form Styles for Login and Register */
 .form-container {
   margin: 0 auto;
-  width: 100%;
   max-width: 980px;
-  padding: clamp(1rem, 4vw, 2rem) clamp(0.5rem, 2vw, 1rem);
+  padding: 2rem 1rem;
 }
 
 .form {
   background: var(--secondary-color);
-  padding: clamp(1rem, 4vw, 2rem);
+  padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  max-width: clamp(300px, 80vw, 400px); /* Responsive form width */
-  margin: clamp(1rem, 4vw, 2rem) auto;
+  max-width: 400px;
+  margin: 2rem auto;
 }
 
 .form-group {
-  margin-bottom: clamp(0.75rem, 3vw, 1.5rem);
+  margin-bottom: 1.5rem;
 }
 
 .form-group label {
   color: var(--text-color);
   display: block;
-  margin-bottom: clamp(0.25rem, 1vw, 0.5rem);
-  font-size: clamp(14px, 3vw, 16px);
+  margin-bottom: 0.5rem;
 }
 
 .form-group input {
   width: 100%;
-  padding: clamp(0.5rem, 2vw, 0.75rem);
+  padding: 0.75rem;
   border: none;
   border-radius: 8px;
   background: var(--primary-color);
   color: var(--text-color);
-  font-size: clamp(0.9rem, 3vw, 1rem);
+  font-size: 1rem;
 }
 
 .form-group input::placeholder {
@@ -288,14 +302,13 @@ body.hide-header .header {
 
 .submit-button {
   width: 100%;
-  padding: clamp(0.5rem, 2vw, 0.75rem);
+  padding: 0.75rem;
   background: linear-gradient(to right, #4285f4, #d96570);
   color: #fff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: 0.2s ease;
-  font-size: clamp(14px, 3vw, 16px);
 }
 
 .submit-button:hover {
@@ -305,10 +318,10 @@ body.hide-header .header {
 /* Chat History Box */
 .history-box {
   position: fixed;
-  top: clamp(30px, 10vw, 60px);
-  right: clamp(5px, 2vw, 10px);
-  width: clamp(200px, 40vw, 300px);
-  max-height: clamp(200px, 60vh, 400px);
+  top: 60px;
+  right: 10px;
+  width: 300px;
+  max-height: 400px;
   background: var(--secondary-color);
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -317,18 +330,16 @@ body.hide-header .header {
 }
 
 .history-content {
-  padding: clamp(0.5rem, 2vw, 1rem);
+  padding: 1rem;
 }
 
-.history-content .text {
+.history-content .text{
   color: white;
-  font-size: clamp(12px, 3vw, 14px);
 }
-
 .history-entry {
   display: block;
   text-decoration: none;
-  margin-bottom: clamp(0.5rem, 2vw, 1rem);
+  margin-bottom: 1rem;
 }
 
 .history-entry .message .message-content {
@@ -342,113 +353,12 @@ body.hide-header .header {
 
 .history-entry .message .text small {
   color: var(--subheading-color);
-  font-size: clamp(0.6rem, 2vw, 0.8rem);
+  font-size: 0.8rem;
 }
 
 /* Timestamp on view_chat page */
 .timestamp {
   color: var(--subheading-color);
   text-align: center;
-  margin-top: clamp(0.5rem, 2vw, 1rem);
-  font-size: clamp(12px, 3vw, 14px);
-}
-
-.nav-link {
-  color: #E3E3E3;
-  text-align: center;
-  margin-top: clamp(10px, 3vw, 15px);
-  font-size: clamp(12px, 3vw, 14px);
-}
-
-.nav-link a {
-  color: #50fa7b;
-  text-decoration: none;
-}
-
-.nav-link a:hover {
-  text-decoration: underline;
-}
-
-/* Mic button styling */
-.mic-button {
-  cursor: pointer;
-  font-size: clamp(16px, 5vw, 24px);
-  padding: clamp(5px, 2vw, 10px);
-  background: #383838;
-  color: #E3E3E3;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.mic-button.listening {
-  background: #50fa7b;
-  color: #242424;
-}
-
-.mic-button.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Media Queries for Responsiveness */
-@media (max-width: 768px) {
-  .header {
-    margin-top: clamp(1vh, 4vh, 6vh);
-    text-align: center;
-  }
-
-  .header :where(.title, .subtitle) {
-    line-height: clamp(1.5rem, 6vw, 2.6rem);
-  }
-
-  .chat-list {
-    padding-bottom: clamp(4rem, 15vw, 12rem);
-  }
-
-  .chat-list .message .message-content {
-    max-width: 90%;
-  }
-
-  .preview-window {
-    width: 95%;
-    padding: clamp(5px, 2vw, 10px);
-  }
-
-  .preview-content iframe {
-    height: clamp(200px, 60vh, 500px);
-  }
-
-  .history-box {
-    width: clamp(150px, 50vw, 300px);
-    top: clamp(20px, 5vw, 60px);
-  }
-}
-
-@media (max-width: 480px) {
-  .header .title {
-    font-size: clamp(1rem, 5vw, 2rem);
-  }
-
-  .header .subtitle {
-    font-size: clamp(0.9rem, 4vw, 1.7rem);
-  }
-
-  .chat-list {
-    padding: clamp(0.5rem, 3vw, 1rem) clamp(0.25rem, 1vw, 0.5rem) clamp(3rem, 10vw, 6rem);
-  }
-
-  .voice-area .mic-button {
-    width: clamp(30px, 10vw, 50px);
-    height: clamp(30px, 10vw, 50px);
-    font-size: clamp(1rem, 4vw, 1.5rem);
-  }
-
-  .form {
-    max-width: 90%;
-    padding: clamp(0.5rem, 3vw, 1rem);
-  }
-
-  .submit-button {
-    padding: clamp(0.3rem, 1.5vw, 0.5rem);
-  }
+  margin-top: 1rem;
 }
