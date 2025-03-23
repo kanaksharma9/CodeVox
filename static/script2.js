@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (recognition) {
       recognition.continuous = false;
       recognition.lang = "en-US";
+      console.log("SpeechRecognition initialized successfully.");
     } else {
       console.warn("Speech Recognition not supported. Using text input only.");
       micButton.disabled = true;
@@ -93,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
           responseDiv.querySelector(".text").textContent += "\n(Failed to save to history)";
         }
 
-        // Preview logic from your code
+        // Preview logic
         const codeMatch = responseText.match(/```([\w-]+)\n([\s\S]*?)\n```/);
         let previewContent = '';
 
@@ -140,7 +141,6 @@ document.addEventListener("DOMContentLoaded", () => {
             </html>`;
         }
 
-        // Create and show preview window
         const previewWindow = document.createElement("div");
         previewWindow.classList.add("preview-window");
         previewWindow.innerHTML = `
@@ -160,12 +160,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (recognition) {
       micButton.addEventListener("click", () => {
+        console.log("Mic button clicked.");
         if (!isRecognitionActive) {
           try {
+            console.log("Starting speech recognition...");
             recognition.start();
             micButton.classList.add("listening");
             isRecognitionActive = true;
-            recognitionTimeout = setTimeout(() => recognition.stop(), 5000);
+            recognitionTimeout = setTimeout(() => {
+              console.log("Recognition timeout triggered.");
+              recognition.stop();
+            }, 5000);
           } catch (e) {
             console.error("Failed to start recognition:", e);
             alert("Microphone access denied or unavailable. Check permissions and network.");
@@ -175,7 +180,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
+      recognition.onstart = () => {
+        console.log("Speech recognition started.");
+      };
+
       recognition.onresult = (event) => {
+        console.log("Speech recognition result received.");
         micButton.classList.remove("listening");
         isRecognitionActive = false;
         clearTimeout(recognitionTimeout);
@@ -187,10 +197,10 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
         micButton.classList.remove("listening");
         isRecognitionActive = false;
         clearTimeout(recognitionTimeout);
-        console.error("Speech recognition error:", event.error);
         let errorMessage = "Speech recognition failed: ";
         switch (event.error) {
           case "network":
@@ -211,10 +221,10 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       recognition.onend = () => {
+        console.log("Speech recognition ended.");
         micButton.classList.remove("listening");
         isRecognitionActive = false;
         clearTimeout(recognitionTimeout);
-        console.log("Speech recognition ended.");
       };
     }
 
