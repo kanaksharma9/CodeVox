@@ -4,13 +4,13 @@ body {
   margin: 0;
   padding: 0;
   background-color: #757575;
-  min-height: 100vh; /* Ensure body takes full viewport height */
+  height: 1000px; /* Fixed height instead of min-height */
 }
 
 .container {
-  width: 100%;
-  height: 100%;
-  --s: clamp(100px, 20vw, 200px); /* Responsive size between 100px and 200px */
+  width: 1000px; /* Fixed width */
+  height: 1000px; /* Fixed height */
+  --s: 200px; /* Fixed size, no clamp */
   --c1: #1d1d1d;
   --c2: #4e4f51;
   --c3: #3c3c3c;
@@ -30,9 +30,9 @@ body {
 }
 
 .wrapper {
-  width: 100%;
-  min-height: 100vh; /* Full height on all screens */
-  --s: clamp(100px, 20vw, 200px); /* Responsive size */
+  width: 1000px; /* Fixed width */
+  height: 1000px; /* Fixed height */
+  --s: 200px; /* Fixed size */
   --c1: #1d1d1d;
   --c2: #4e4f51;
   --c3: #3c3c3c;
@@ -61,36 +61,35 @@ body {
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
-  width: 100%;
-  padding: 1rem; /* Relative padding */
+  width: 1000px; /* Fixed width */
+  padding: 20px; /* Fixed padding */
 }
 
 .header {
-  width: 100%;
-  max-width: 900px; /* Cap width but allow shrinking */
-  padding: 0.5rem 1rem;
+  width: 900px; /* Fixed width */
+  padding: 10px 20px; /* Fixed padding */
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   color: white;
-  margin: 0 auto; /* Center horizontally */
+  margin: 0 auto;
 }
 
 #logo {
-  font-size: clamp(14px, 4vw, 19px); /* Responsive font size */
+  font-size: 19px; /* Fixed size */
   font-family: sans-serif;
   letter-spacing: 0.5em;
   border: 2px solid white;
-  padding: 0.3rem 0.5rem;
+  padding: 5px 10px; /* Fixed padding */
 }
 
 #nav-menu {
-  width: clamp(100px, 30vw, 200px); /* Responsive width */
+  width: 200px; /* Fixed width */
   display: flex;
   flex-direction: row;
   justify-content: center;
-  visibility: visible; /* Default visible, adjust with JS if needed */
+  visibility: visible;
   opacity: 1;
   transition: all 0.2s ease-in;
 }
@@ -98,11 +97,11 @@ body {
 .nav-link {
   text-transform: uppercase;
   text-decoration: none;
-  font-size: clamp(12px, 3vw, 15px);
+  font-size: 15px; /* Fixed size */
   font-family: Helvetica, sans-serif;
   font-weight: bold;
   color: #424242;
-  margin: 0 1rem;
+  margin: 0 20px; /* Fixed margin */
 }
 
 .nav-link:hover {
@@ -112,43 +111,43 @@ body {
 
 .fa-search {
   position: relative;
-  left: clamp(20px, 5vw, 70px);
+  left: 70px; /* Fixed position */
 }
 
 .fa-bars {
   cursor: pointer;
   color: white;
-  font-size: clamp(16px, 4vw, 20px);
+  font-size: 20px; /* Fixed size */
 }
 
 .main-content {
-  padding: 0 1rem;
+  padding: 0 20px; /* Fixed padding */
   font-family: 'Raleway', sans-serif;
   overflow: hidden;
   margin: 0 auto;
-  max-width: 900px;
+  width: 900px; /* Fixed width */
 }
 
 #main-header {
   margin-bottom: 0;
   text-transform: uppercase;
-  font-size: clamp(40px, 10vw, 100px); /* Responsive font */
+  font-size: 100px; /* Fixed size */
   color: white;
   font-weight: bold;
   letter-spacing: 0.2em;
   position: relative;
-  top: clamp(50px, 20vh, 180px); /* Responsive positioning */
+  top: 180px; /* Fixed position */
   transition: all 0.5s ease-in-out;
 }
 
 #sub-heading {
-  font-size: clamp(20px, 6vw, 32px);
+  font-size: 32px; /* Fixed size */
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: white;
   margin-top: 0;
   position: relative;
-  top: clamp(20px, 10vh, 70px);
+  top: 70px; /* Fixed position */
   transition: all 0.5s ease-in-out;
 }
 
@@ -161,9 +160,9 @@ body {
 }
 
 .image {
-  width: 100%; /* Full width within container */
-  height: auto; /* Maintain aspect ratio */
-  object-fit: cover; /* Ensure image fills space */
+  width: 100%; /* Still relative to parent, but parent is fixed */
+  height: auto;
+  object-fit: cover;
 }
 
 .container1 {
@@ -176,7 +175,7 @@ body {
 
 .container2 .image {
   position: relative;
-  left: clamp(0px, 30vw, 450px); /* Responsive offset */
+  left: 450px; /* Fixed position */
   transition: left 0.5s ease-out;
 }
 
@@ -193,7 +192,7 @@ body {
 .container4 .image {
   height: 100%;
   position: relative;
-  left: clamp(0px, 20vw, 260px);
+  left: 260px; /* Fixed position */
   transition: left 0.5s ease-out;
 }
 
@@ -205,11 +204,11 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  font-size: clamp(14px, 4vw, 20px);
+  font-size: 20px; /* Fixed size */
   font-family: Helvetica, sans-serif;
   text-transform: uppercase;
   position: relative;
-  left: clamp(0px, 20vw, 260px);
+  left: 260px; /* Fixed position */
   transition: left 0.5s ease-out;
 }
 
@@ -218,7 +217,7 @@ body {
   padding: 0;
   margin: 0;
   position: relative;
-  top: clamp(20px, 5vh, 45px);
+  top: 45px; /* Fixed position */
   letter-spacing: 0.2em;
   transition: top 0.6s ease-in;
 }
@@ -233,9 +232,9 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px; /* Fixed gap */
   transform-origin: center;
-  padding: clamp(0.5rem, 2vw, 1rem) clamp(1rem, 3vw, 2rem); /* Responsive padding */
+  padding: 16px 32px; /* Fixed padding */
   background-color: transparent;
   border: none;
   border-radius: var(--border_radius);
@@ -260,7 +259,7 @@ body {
   background-color: var(--black-700);
   box-shadow: inset 0 0.5px hsl(0, 0%, 100%), inset 0 -1px 2px 0 hsl(0, 0%, 0%),
     0px 4px 10px -4px hsla(0 0% 0% / calc(1 - var(--active, 0))),
-    0 0 0 calc(var(--active, 0) * 0.375rem) hsl(260 97% 50% / 0.75);
+    0 0 0 calc(var(--active, 0) * 6px) hsl(260 97% 50% / 0.75);
   transition: all var(--transtion);
   z-index: 0;
 }
@@ -285,7 +284,7 @@ body {
 
 .button .a {
   color: white;
-  font-size: clamp(12px, 3vw, 16px);
+  font-size: 16px; /* Fixed size */
 }
 
 .button .dots_border {
@@ -302,7 +301,7 @@ body {
   left: 50%;
   transform: translate(-50%, -50%) rotate(0deg);
   width: 100%;
-  height: 2rem;
+  height: 32px; /* Fixed height */
   background-color: white;
   mask: linear-gradient(transparent 0%, white 120%);
   animation: rotate 2s linear infinite;
@@ -317,7 +316,7 @@ body {
 .button .sparkle {
   position: relative;
   z-index: 10;
-  width: clamp(1rem, 3vw, 1.75rem);
+  width: 28px; /* Fixed size */
 }
 
 .button .sparkle .path {
@@ -347,60 +346,6 @@ body {
   z-index: 10;
   background-image: linear-gradient(90deg, hsla(0 0% 100% / 1) 0%, hsla(0 0% 100% / var(--active, 0)) 120%);
   background-clip: text;
-  font-size: clamp(12px, 3vw, 1rem);
+  font-size: 16px; /* Fixed size */
   color: transparent;
-}
-
-/* Media Queries for Responsiveness */
-@media (max-width: 768px) {
-  .wrapper {
-    flex-direction: column; /* Stack containers vertically */
-  }
-
-  .container1, .container2, .container3 {
-    flex: 1; /* Equal height in column layout */
-    width: 100%; /* Full width on mobile */
-  }
-
-  .container2 .image, .container4 .image, .container5 {
-    left: 0; /* Reset offsets for mobile */
-  }
-
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0.5rem;
-  }
-
-  #nav-menu {
-    width: 100%;
-    justify-content: space-around;
-    margin-top: 1rem;
-  }
-
-  .fa-search {
-    left: 0;
-  }
-
-  .main-content {
-    text-align: center;
-  }
-
-  #main-header, #sub-heading {
-    top: 0; /* Reset positioning for mobile */
-  }
-}
-
-@media (max-width: 480px) {
-  #main-header {
-    font-size: clamp(30px, 8vw, 60px); /* Smaller on very small screens */
-  }
-
-  #sub-heading {
-    font-size: clamp(16px, 5vw, 24px);
-  }
-
-  .button {
-    padding: clamp(0.3rem, 1.5vw, 0.8rem) clamp(0.8rem, 2vw, 1.5rem);
-  }
 }
