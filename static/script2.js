@@ -11,11 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const recognition = SpeechRecognition ? new SpeechRecognition() : null;
-  if (recognition) {
-    recognition.continuous = false;
-    recognition.lang = "en-US";
-  } else {
+  if (!SpeechRecognition) {
     console.error("Speech Recognition API not supported in this browser.");
     alert("Your browser doesn’t support speech recognition. Try Chrome or Edge.");
     micButton.disabled = true;
@@ -23,8 +19,10 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  const recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.lang = "en-US";
   let isRecognitionActive = false;
-  let recognitionTimeout;
 
   const createMessageElement = (content, type) => {
     const messageDiv = document.createElement("div");
@@ -99,17 +97,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const language = codeMatch[1].toLowerCase();
         let code = codeMatch[2];
 
-        // Decode URL-encoded content if present
         if (code.includes('%')) {
           try {
             code = decodeURIComponent(code);
           } catch (e) {
             console.error("Failed to decode URI component:", e);
-            code = codeMatch[2]; // Fallback to raw code
+            code = codeMatch[2];
           }
         }
 
-        // Responsive CSS for previews
         const responsiveStyles = `
           <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -208,63 +204,57 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   micButton.addEventListener("click", () => {
-    if (!isRecognitionActive && recognition) {
+    if (!isRecognitionActive) {
       try {
         recognition.start();
         micButton.classList.add("listening");
         isRecognitionActive = true;
-        recognitionTimeout = setTimeout(() => {
-          recognition.stop();
-        }, 5000);
+        console.log("Mic started");
       } catch (e) {
         console.error("Failed to start recognition:", e);
-        alert("Microphone access denied or unavailable. Please check permissions.");
+        alert("Microphone error: " + e.message);
         micButton.classList.remove("listening");
         isRecognitionActive = false;
       }
     }
   });
 
-  if (recognition) {
-    recognition.onresult = (event) => {
-      micButton.classList.remove("listening");
-      isRecognitionActive = false;
-      clearTimeout(recognitionTimeout);
-      const transcript = event.results[0][0].transcript;
-      const userMessageDiv = createMessageElement(transcript, "outgoing");
-      chatContainer.appendChild(userMessageDiv);
-      chatContainer.scrollTo(0, chatContainer.scrollHeight);
-      fetchGeminiResponse(transcript);
-    };
+  recognition.onresult = (event) => {
+    micButton.classList.remove("listening");
+    isRecognitionActive = false;
+    const transcript = event.results[0][0].transcript;
+    const userMessageDiv = createMessageElement(transcript, "outgoing");
+    chatContainer.appendChild(userMessageDiv);
+    chatContainer.scrollTo(0, chatContainer.scrollHeight);
+    fetchGeminiResponse(transcript);
+    console.log("Speech recognized:", transcript);
+  };
 
-    recognition.onerror = (event) => {
-      micButton.classList.remove("listening");
-      isRecognitionActive = false;
-      clearTimeout(recognitionTimeout);
-      console.error("Speech recognition error:", event.error);
-      let errorMessage = "Speech recognition failed: ";
-      switch (event.error) {
-        case "network":
-          errorMessage += "Network issue. Check your internet connection.";
-          break;
-        case "not-allowed":
-        case "service-not-allowed":
-          errorMessage += "Microphone access denied. Please grant permissions.";
-          break;
-        case "no-speech":
-          errorMessage += "No speech detected. Try speaking louder or closer.";
-          break;
-        default:
-          errorMessage += event.error;
-      }
-      alert(errorMessage);
-    };
+  recognition.onerror = (event) => {
+    micButton.classList.remove("listening");
+    isRecognitionActive = false;
+    console.error("Speech recognition error:", event.error);
+    let errorMessage = "Speech recognition failed: ";
+    switch (event.error) {
+      case "network":
+        errorMessage += "Network issue. Check your internet connection.";
+        break;
+      case "not-allowed":
+      case "service-not-allowed":
+        errorMessage += "Microphone access denied. Please grant permissions.";
+        break;
+      case "no-speech":
+        errorMessage += "No speech detected. Try speaking louder or closer.";
+        break;
+      default:
+        errorMessage += event.error;
+    }
+    alert(errorMessage);
+  };
 
-    recognition.onend = () => {
-      micButton.classList.remove("listening");
-      isRecognitionActive = false;
-      clearTimeout(recognitionTimeout);
-      console.log("Speech recognition ended.");
-    };
-  }
+  recognition.onend = () => {
+    micButton.classList.remove("listening");
+    isRecognitionActive = false;
+    console.log("Speech recognition ended.");
+  };
 });
