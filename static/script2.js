@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
           recognitionTimeout = setTimeout(() => recognition.stop(), 5000);
         } catch (e) {
           console.error("Failed to start recognition:", e);
-          alert("Microphone access denied or unavailable. Please allow microphone permissions.");
+          alert("Microphone access denied or unavailable. Please check permissions and network.");
           micButton.classList.remove("listening");
           isRecognitionActive = false;
         }
@@ -190,7 +190,22 @@ document.addEventListener("DOMContentLoaded", () => {
       isRecognitionActive = false;
       clearTimeout(recognitionTimeout);
       console.error("Speech recognition error:", event.error);
-      alert(`Speech recognition error: ${event.error}. Please ensure microphone permissions are granted.`);
+      let errorMessage = "Speech recognition failed: ";
+      switch (event.error) {
+        case "network":
+          errorMessage += "Network issue. Check your internet connection.";
+          break;
+        case "not-allowed":
+        case "service-not-allowed":
+          errorMessage += "Microphone access denied. Please grant permissions.";
+          break;
+        case "no-speech":
+          errorMessage += "No speech detected. Try speaking louder or closer.";
+          break;
+        default:
+          errorMessage += event.error;
+      }
+      alert(errorMessage);
       recognition.stop();
     };
 
