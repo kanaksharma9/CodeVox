@@ -54,11 +54,11 @@ The application implements a secure login and registration system using Werkzeug
 ## Setup Instructions
 
 ```bash
-# Clone the repositoryhttps://github.com/kanaksharma9/voice-to-code-converter
-git clone https://github.com/kanaksharma9/voice-to-code-converter
+# Clone the repository https://github.com/kanaksharma9/CodeVox.git
+git clone https://github.com/kanaksharma9/CodeVox.git
 
 # Navigate to project directory
-cd voice-to-code-converter
+cd CodeVox
 
 # Install dependencies
 pip install -r requirements.txt
