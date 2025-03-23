@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from werkzeug.security import check_password_hash, generate_password_hash
 import sqlite3
 import os
+import json
 from dotenv import load_dotenv
 import requests
 
@@ -9,8 +10,13 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")
 
-def init_db():
+def get_db_connection():
     conn = sqlite3.connect('users.db')
+    conn.row_factory = sqlite3.Row  # For dict-like row access
+    return conn
+
+def init_db():
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS users 
                  (id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -24,6 +30,19 @@ def init_db():
                   result TEXT, 
                   timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                   FOREIGN KEY (user_id) REFERENCES users(id))''')
+    
+    # Load default user from environment variable
+    default_users_json = os.getenv("DEFAULT_USERS")
+    if default_users_json:
+        default_users = json.loads(default_users_json)
+        c.execute("SELECT COUNT(*) FROM users")
+        user_count = c.fetchone()[0]
+        if user_count == 0:
+            for user in default_users:
+                c.execute("INSERT OR IGNORE INTO users (username, password, email) VALUES (?, ?, ?)",
+                          (user["username"], user["password"], user["email"]))
+            print("Loaded default users from environment variable.")
+    
     conn.commit()
     conn.close()
 
@@ -42,14 +61,14 @@ def chat():
         data = request.get_json()
         prompt = data.get('prompt')
         result = data.get('result')
-        conn = sqlite3.connect('users.db')
+        conn = get_db_connection()
         c = conn.cursor()
         c.execute("INSERT INTO chat_history (user_id, prompt, result) VALUES (?, ?, ?)",
                   (session['user_id'], prompt, result))
         conn.commit()
         conn.close()
         return jsonify({'status': 'success'})
-    conn = sqlite3.connect('users.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("SELECT id, prompt, timestamp FROM chat_history WHERE user_id = ? ORDER BY timestamp DESC",
               (session['user_id'],))
@@ -61,7 +80,7 @@ def chat():
 def view_chat(chat_id):
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    conn = sqlite3.connect('users.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("SELECT prompt, result, timestamp FROM chat_history WHERE id = ? AND user_id = ?",
               (chat_id, session['user_id']))
@@ -75,7 +94,7 @@ def view_chat(chat_id):
 def get_history():
     if 'user_id' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
-    conn = sqlite3.connect('users.db')
+    conn = get_db_connection()
     c = conn.cursor()
     c.execute("SELECT id, prompt, timestamp FROM chat_history WHERE user_id = ? ORDER BY timestamp DESC",
               (session['user_id'],))
@@ -120,7 +139,7 @@ def register():
             return render_template("register.html", message="All fields are required.")
         hashed_password = generate_password_hash(password)
         try:
-            conn = sqlite3.connect('users.db')
+            conn = get_db_connection()
             c = conn.cursor()
             c.execute("INSERT INTO users (username, password, email) VALUES (?, ?, ?)",
                       (username, hashed_password, email))
@@ -128,6 +147,7 @@ def register():
             conn.close()
             return redirect("/login")
         except sqlite3.IntegrityError:
+            conn.close()
             return render_template("register.html", message="Username already exists.")
     return render_template("register.html")
 
@@ -136,13 +156,13 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        conn = sqlite3.connect('users.db')
+        conn = get_db_connection()
         c = conn.cursor()
         c.execute("SELECT * FROM users WHERE username = ?", (username,))
         user = c.fetchone()
         conn.close()
-        if user and check_password_hash(user[2], password):
-            session["user_id"] = user[0]
+        if user and check_password_hash(user["password"], password):
+            session["user_id"] = user["id"]
             return redirect("/chat")
         return render_template("login.html", message="Invalid username or password.")
     return render_template("login.html")
