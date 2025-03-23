@@ -12,6 +12,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      console.error("Speech Recognition API not supported in this browser.");
+      alert("Your browser doesn’t support speech recognition. Try Chrome or Edge.");
+      micButton.disabled = true;
+      return;
+    }
+
     const recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.lang = "en-US";
@@ -62,16 +69,11 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const response = await fetch('/api/gemini', {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt: message })
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
         const responseText = data.response || "Error: No response from AI.";
         responseDiv.querySelector(".text").textContent = responseText;
@@ -82,9 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt: message, result: responseText })
           });
-          if (!saveResponse.ok) {
-            throw new Error('Failed to save to chat history');
-          }
+          if (!saveResponse.ok) throw new Error('Failed to save to chat history');
           await updateHistory();
         } catch (error) {
           console.error("Error saving to backend:", error);
@@ -97,107 +97,45 @@ document.addEventListener("DOMContentLoaded", () => {
         if (codeMatch && codeMatch[2]) {
           const language = codeMatch[1].toLowerCase();
           const code = codeMatch[2];
-
           if (language === "html") {
-            // Ensure full HTML structure for rendering
             previewContent = code.includes("<!DOCTYPE") || code.includes("<html")
               ? code
               : `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview</title></head><body>${code}</body></html>`;
           } else if (language === "javascript") {
-            // Execute JavaScript in iframe with console output
             previewContent = `
-              <!DOCTYPE html>
-              <html lang="en">
-              <head>
-                <meta charset="UTF-8">
-                <title>Preview - JavaScript</title>
-                <style>
-                  body { font-family: monospace; padding: 20px; background: #242424; color: #E3E3E3; }
-                  pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-                </style>
-              </head>
-              <body>
-                <pre id="output"></pre>
-                <script>
-                  try {
-                    const log = console.log;
-                    console.log = (...args) => {
-                      document.getElementById('output').textContent += args.join(' ') + '\\n';
-                      log(...args);
-                    };
-                    ${code}
-                  } catch (e) {
-                    document.getElementById('output').textContent = 'Error: ' + e.message;
-                  }
-                </script>
-              </body>
-              </html>
-            `;
+              <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview - JavaScript</title>
+              <style>body { font-family: monospace; padding: 20px; background: #242424; color: #E3E3E3; }
+              pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }</style>
+              </head><body><pre id="output"></pre><script>
+                try { const log = console.log; console.log = (...args) => { document.getElementById('output').textContent += args.join(' ') + '\\n'; log(...args); }; ${code} }
+                catch (e) { document.getElementById('output').textContent = 'Error: ' + e.message; }
+              </script></body></html>`;
           } else if (language === "python") {
-            // Display Python as syntax-highlighted text (no execution in browser)
             previewContent = `
-              <!DOCTYPE html>
-              <html lang="en">
-              <head>
-                <meta charset="UTF-8">
-                <title>Preview - Python</title>
-                <style>
-                  body { font-family: monospace; padding: 20px; background: #242424; color: #E3E3E3; }
-                  pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-                  .keyword { color: #ff79c6; }
-                  .string { color: #f1fa8c; }
-                  .comment { color: #6272a4; }
-                </style>
-              </head>
-              <body>
-                <pre>${highlightPython(code)}</pre>
-              </body>
-              </html>
-            `;
+              <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview - Python</title>
+              <style>body { font-family: monospace; padding: 20px; background: #242424; color: #E3E3E3; }
+              pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+              .keyword { color: #ff79c6; } .string { color: #f1fa8c; } .comment { color: #6272a4; }</style>
+              </head><body><pre>${highlightPython(code)}</pre></body></html>`;
           } else {
-            // Generic code preview with monospace styling
             previewContent = `
-              <!DOCTYPE html>
-              <html lang="en">
-              <head>
-                <meta charset="UTF-8">
-                <title>Preview - ${language}</title>
-                <style>
-                  body { font-family: monospace; padding: 20px; background: #242424; color: #E3E3E3; }
-                  pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-                </style>
-              </head>
-              <body>
-                <pre>${code}</pre>
-              </body>
-              </html>
-            `;
+              <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview - ${language}</title>
+              <style>body { font-family: monospace; padding: 20px; background: #242424; color: #E3E3E3; }
+              pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }</style>
+              </head><body><pre>${code}</pre></body></html>`;
           }
         } else {
-          // Non-code response preview
           previewContent = `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-              <meta charset="UTF-8">
-              <title>Preview</title>
-              <style>
-                body { font-family: Arial, sans-serif; padding: 20px; background: #242424; color: #E3E3E3; }
-                pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); white-space: pre-wrap; }
-              </style>
-            </head>
-            <body>
-              <pre>${responseText}</pre>
-            </body>
-            </html>
-          `;
+            <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview</title>
+            <style>body { font-family: Arial, sans-serif; padding: 20px; background: #242424; color: #E3E3E3; }
+            pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); white-space: pre-wrap; }</style>
+            </head><body><pre>${responseText}</pre></body></html>`;
         }
 
         if (previewContent) {
           const previewWindow = document.createElement("div");
           previewWindow.classList.add("preview-window");
-          // Double-escape quotes to ensure srcdoc works
-          const escapedContent = previewContent.replace(/"/g, '&quot;');
+          const escapedContent = previewContent.replace(/"/g, '"');
           previewWindow.innerHTML = `
             <div class="preview-content">
               <button class="close-preview">X</button>
@@ -205,10 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
           `;
           document.body.appendChild(previewWindow);
-
-          previewWindow.querySelector(".close-preview").addEventListener("click", () => {
-            previewWindow.remove();
-          });
+          previewWindow.querySelector(".close-preview").addEventListener("click", () => previewWindow.remove());
         }
       } catch (error) {
         console.error("Gemini proxy error:", error);
@@ -216,7 +151,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
-    // Simple Python syntax highlighting (client-side)
     function highlightPython(code) {
       return code
         .replace(/\b(def|class|if|else|elif|for|while|try|except|with|return|import|from|as)\b/g, '<span class="keyword">$1</span>')
@@ -226,13 +160,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     micButton.addEventListener("click", () => {
       if (!isRecognitionActive) {
-        recognition.start();
-        micButton.classList.add("listening");
-        isRecognitionActive = true;
-
-        recognitionTimeout = setTimeout(() => {
-          recognition.stop();
-        }, 5000);
+        try {
+          recognition.start();
+          micButton.classList.add("listening");
+          isRecognitionActive = true;
+          recognitionTimeout = setTimeout(() => recognition.stop(), 5000);
+        } catch (e) {
+          console.error("Failed to start recognition:", e);
+          alert("Microphone access denied or unavailable. Please allow microphone permissions.");
+          micButton.classList.remove("listening");
+          isRecognitionActive = false;
+        }
       }
     });
 
@@ -252,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
       isRecognitionActive = false;
       clearTimeout(recognitionTimeout);
       console.error("Speech recognition error:", event.error);
-      alert("Speech recognition error. Please try again.");
+      alert(`Speech recognition error: ${event.error}. Please ensure microphone permissions are granted.`);
       recognition.stop();
     };
 
@@ -260,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
       micButton.classList.remove("listening");
       isRecognitionActive = false;
       clearTimeout(recognitionTimeout);
-      console.log("Speech recognition ended. You can restart it by clicking the button.");
+      console.log("Speech recognition ended.");
     };
   }, 100);
 });
