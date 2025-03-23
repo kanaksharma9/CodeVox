@@ -4,13 +4,12 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     const chatContainer = document.querySelector(".chat-list");
     const micButton = document.querySelector("#voice-input-button");
+    const textInput = document.querySelector("#text-input");
+    const textSubmit = document.querySelector("#text-submit");
     const historyBox = document.getElementById("history-box");
 
-    // Detailed error checking
-    if (!chatContainer) console.error("chatContainer (.chat-list) not found in DOM.");
-    if (!micButton) console.error("micButton (#voice-input-button) not found in DOM.");
-    if (!chatContainer || !micButton) {
-      console.error("Error: Required elements not found in the DOM. Aborting script.");
+    if (!chatContainer || !micButton || !textSubmit) {
+      console.error("Error: Required elements not found in the DOM.");
       return;
     }
 
@@ -19,10 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (recognition) {
       recognition.continuous = false;
       recognition.lang = "en-US";
-      console.log("SpeechRecognition initialized successfully.");
     } else {
-      console.warn("Speech Recognition not supported. Mic disabled.");
-      micButton.classList.add("disabled");
+      console.warn("Speech Recognition not supported. Using text input only.");
+      micButton.disabled = true;
       micButton.title = "Speech not supported in this browser";
     }
 
@@ -95,83 +93,92 @@ document.addEventListener("DOMContentLoaded", () => {
           responseDiv.querySelector(".text").textContent += "\n(Failed to save to history)";
         }
 
-        // Preview logic
         const codeMatch = responseText.match(/```([\w-]+)\n([\s\S]*?)\n```/);
         let previewContent = '';
 
         if (codeMatch && codeMatch[2]) {
           const language = codeMatch[1].toLowerCase();
-          const code = codeMatch[2].trim();
+          let code = codeMatch[2];
+          
+          // Decode URL-encoded content if present
+          if (code.includes('%')) {
+            try {
+              code = decodeURIComponent(code);
+            } catch (e) {
+              console.error("Failed to decode URI component:", e);
+            }
+          }
 
           if (language === "html") {
-            previewContent = code.includes("<html") 
-              ? code 
+            previewContent = code.includes("<!DOCTYPE") || code.includes("<html")
+              ? code
               : `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview</title></head><body>${code}</body></html>`;
+          } else if (language === "javascript") {
+            previewContent = `
+              <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview - JavaScript</title>
+              <style>body { font-family: monospace; padding: 20px; background: #242424; color: #E3E3E3; }
+              pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }</style>
+              </head><body><pre id="output"></pre><script>
+                try { const log = console.log; console.log = (...args) => { document.getElementById('output').textContent += args.join(' ') + '\\n'; log(...args); }; ${code} }
+                catch (e) { document.getElementById('output').textContent = 'Error: ' + e.message; }
+              </script></body></html>`;
+          } else if (language === "python") {
+            previewContent = `
+              <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview - Python</title>
+              <style>body { font-family: monospace; padding: 20px; background: #242424; color: #E3E3E3; }
+              pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+              .keyword { color: #ff79c6; } .string { color: #f1fa8c; } .comment { color: #6272a4; }</style>
+              </head><body><pre>${highlightPython(code)}</pre></body></html>`;
           } else {
             previewContent = `
-              <!DOCTYPE html>
-              <html lang="en">
-              <head>
-                <meta charset="UTF-8">
-                <title>Preview - ${language}</title>
-                <style>
-                  body { font-family: "Poppins", sans-serif; padding: 20px; background: #242424; color: #E3E3E3; }
-                  pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-                </style>
-              </head>
-              <body>
-                <pre>${code}</pre>
-              </body>
-              </html>`;
+              <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview - ${language}</title>
+              <style>body { font-family: monospace; padding: 20px; background: #242424; color: #E3E3E3; }
+              pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }</style>
+              </head><body><pre>${code}</pre></body></html>`;
           }
         } else {
           previewContent = `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-              <meta charset="UTF-8">
-              <title>Preview</title>
-              <style>
-                body { font-family: "Poppins", sans-serif; padding: 20px; background: #242424; color: #E3E3E3; }
-                pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); white-space: pre-wrap; }
-              </style>
-            </head>
-            <body>
-              <pre>${responseText}</pre>
-            </body>
-            </html>`;
+            <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview</title>
+            <style>body { font-family: Arial, sans-serif; padding: 20px; background: #242424; color: #E3E3E3; }
+            pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); white-space: pre-wrap; }</style>
+            </head><body><pre>${responseText}</pre></body></html>`;
         }
 
-        const previewWindow = document.createElement("div");
-        previewWindow.classList.add("preview-window");
-        previewWindow.innerHTML = `
-          <div class="preview-content">
-            <button class="close-preview">X</button>
-            <iframe srcdoc="${encodeURIComponent(previewContent)}" sandbox="allow-scripts allow-same-origin"></iframe>
-          </div>
-        `;
-        document.body.appendChild(previewWindow);
-        previewWindow.querySelector(".close-preview").addEventListener("click", () => previewWindow.remove());
-
+        if (previewContent) {
+          const previewWindow = document.createElement("div");
+          previewWindow.classList.add("preview-window");
+          // Escape quotes properly for srcdoc
+          const escapedContent = previewContent.replace(/"/g, '&quot;');
+          previewWindow.innerHTML = `
+            <div class="preview-content">
+              <button class="close-preview">X</button>
+              <iframe srcdoc="${escapedContent}" sandbox="allow-scripts allow-popups allow-same-origin"></iframe>
+            </div>
+          `;
+          document.body.appendChild(previewWindow);
+          previewWindow.querySelector(".close-preview").addEventListener("click", () => previewWindow.remove());
+        }
       } catch (error) {
         console.error("Gemini proxy error:", error);
         responseDiv.querySelector(".text").textContent = "Error: Unable to process request.";
       }
     };
 
+    function highlightPython(code) {
+      return code
+        .replace(/\b(def|class|if|else|elif|for|while|try|except|with|return|import|from|as)\b/g, '<span class="keyword">$1</span>')
+        .replace(/"([^"]*)"|'([^']*)'/g, '<span class="string">"$1$2"</span>')
+        .replace(/#.*$/gm, '<span class="comment">$&</span>');
+    }
+
     if (recognition) {
       micButton.addEventListener("click", () => {
-        console.log("Mic button clicked.");
         if (!isRecognitionActive) {
           try {
-            console.log("Starting speech recognition...");
             recognition.start();
             micButton.classList.add("listening");
             isRecognitionActive = true;
-            recognitionTimeout = setTimeout(() => {
-              console.log("Recognition timeout triggered.");
-              recognition.stop();
-            }, 5000);
+            recognitionTimeout = setTimeout(() => recognition.stop(), 5000);
           } catch (e) {
             console.error("Failed to start recognition:", e);
             alert("Microphone access denied or unavailable. Check permissions and network.");
@@ -181,12 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      recognition.onstart = () => {
-        console.log("Speech recognition started.");
-      };
-
       recognition.onresult = (event) => {
-        console.log("Speech recognition result received.");
         micButton.classList.remove("listening");
         isRecognitionActive = false;
         clearTimeout(recognitionTimeout);
@@ -198,14 +200,14 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       recognition.onerror = (event) => {
-        console.error("Speech recognition error:", event.error);
         micButton.classList.remove("listening");
         isRecognitionActive = false;
         clearTimeout(recognitionTimeout);
+        console.error("Speech recognition error:", event.error);
         let errorMessage = "Speech recognition failed: ";
         switch (event.error) {
           case "network":
-            errorMessage += "Network issue. Check your connection.";
+            errorMessage += "Network issue. Check your connection or try text input.";
             break;
           case "not-allowed":
           case "service-not-allowed":
@@ -222,11 +224,28 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       recognition.onend = () => {
-        console.log("Speech recognition ended.");
         micButton.classList.remove("listening");
         isRecognitionActive = false;
         clearTimeout(recognitionTimeout);
+        console.log("Speech recognition ended.");
       };
     }
+
+    textSubmit.addEventListener("click", () => {
+      const message = textInput.value.trim();
+      if (message) {
+        const userMessageDiv = createMessageElement(message, "outgoing");
+        chatContainer.appendChild(userMessageDiv);
+        chatContainer.scrollTo(0, chatContainer.scrollHeight);
+        fetchGeminiResponse(message);
+        textInput.value = "";
+      }
+    });
+
+    textInput.addEventListener("keypress", (event) => {
+      if (event.key === "Enter") {
+        textSubmit.click();
+      }
+    });
   }, 100);
 });
