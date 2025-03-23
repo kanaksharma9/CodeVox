@@ -91,59 +91,121 @@ document.addEventListener("DOMContentLoaded", () => {
           responseDiv.querySelector(".text").textContent += "\n(Failed to save to history)";
         }
 
+        // Debug: Log the response to check code detection
+        console.log("Gemini response:", responseText);
+
         const codeMatch = responseText.match(/```([\w-]+)\n([\s\S]*?)\n```/);
         let previewContent = '';
 
         if (codeMatch && codeMatch[2]) {
           const language = codeMatch[1].toLowerCase();
-          const code = codeMatch[2];
+          const code = codeMatch[2].trim();
+          console.log(`Detected code block: Language=${language}, Code=${code}`);
+
           if (language === "html") {
             previewContent = code.includes("<!DOCTYPE") || code.includes("<html")
               ? code
               : `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview</title></head><body>${code}</body></html>`;
           } else if (language === "javascript") {
             previewContent = `
-              <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview - JavaScript</title>
-              <style>body { font-family: monospace; padding: 20px; background: #242424; color: #E3E3E3; }
-              pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }</style>
-              </head><body><pre id="output"></pre><script>
-                try { const log = console.log; console.log = (...args) => { document.getElementById('output').textContent += args.join(' ') + '\\n'; log(...args); }; ${code} }
-                catch (e) { document.getElementById('output').textContent = 'Error: ' + e.message; }
-              </script></body></html>`;
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Preview - JavaScript</title>
+                <style>
+                  body { font-family: monospace; padding: 20px; background: #242424; color: #E3E3E3; }
+                  pre { background: #383838; padding: 15px; border-radius: 5px; }
+                </style>
+              </head>
+              <body>
+                <pre id="output"></pre>
+                <script>
+                  try {
+                    const log = console.log;
+                    console.log = (...args) => {
+                      document.getElementById('output').textContent += args.join(' ') + '\\n';
+                      log(...args);
+                    };
+                    ${code}
+                  } catch (e) {
+                    document.getElementById('output').textContent = 'Error: ' + e.message;
+                  }
+                </script>
+              </body>
+              </html>`;
           } else if (language === "python") {
             previewContent = `
-              <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview - Python</title>
-              <style>body { font-family: monospace; padding: 20px; background: #242424; color: #E3E3E3; }
-              pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-              .keyword { color: #ff79c6; } .string { color: #f1fa8c; } .comment { color: #6272a4; }</style>
-              </head><body><pre>${highlightPython(code)}</pre></body></html>`;
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Preview - Python</title>
+                <style>
+                  body { font-family: monospace; padding: 20px; background: #242424; color: #E3E3E3; }
+                  pre { background: #383838; padding: 15px; border-radius: 5px; }
+                  .keyword { color: #ff79c6; }
+                  .string { color: #f1fa8c; }
+                  .comment { color: #6272a4; }
+                </style>
+              </head>
+              <body>
+                <pre>${highlightPython(code)}</pre>
+              </body>
+              </html>`;
           } else {
             previewContent = `
-              <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview - ${language}</title>
-              <style>body { font-family: monospace; padding: 20px; background: #242424; color: #E3E3E3; }
-              pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }</style>
-              </head><body><pre>${code}</pre></body></html>`;
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Preview - ${language}</title>
+                <style>
+                  body { font-family: monospace; padding: 20px; background: #242424; color: #E3E3E3; }
+                  pre { background: #383838; padding: 15px; border-radius: 5px; }
+                </style>
+              </head>
+              <body>
+                <pre>${code}</pre>
+              </body>
+              </html>`;
           }
         } else {
+          console.log("No code block detected, using plain text preview");
           previewContent = `
-            <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Preview</title>
-            <style>body { font-family: Arial, sans-serif; padding: 20px; background: #242424; color: #E3E3E3; }
-            pre { background: #383838; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); white-space: pre-wrap; }</style>
-            </head><body><pre>${responseText}</pre></body></html>`;
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <title>Preview</title>
+              <style>
+                body { font-family: Arial, sans-serif; padding: 20px; background: #242424; color: #E3E3E3; }
+                pre { background: #383838; padding: 15px; border-radius: 5px; white-space: pre-wrap; }
+              </style>
+            </head>
+            <body>
+              <pre>${responseText}</pre>
+            </body>
+            </html>`;
         }
 
         if (previewContent) {
+          console.log("Creating preview with content:", previewContent);
           const previewWindow = document.createElement("div");
           previewWindow.classList.add("preview-window");
-          const escapedContent = previewContent.replace(/"/g, '"');
+          // Use encodeURIComponent to handle special characters safely
+          const escapedContent = encodeURIComponent(previewContent);
           previewWindow.innerHTML = `
             <div class="preview-content">
               <button class="close-preview">X</button>
-              <iframe srcdoc="${escapedContent}" sandbox="allow-scripts allow-popups allow-same-origin"></iframe>
+              <iframe srcdoc="${decodeURIComponent(escapedContent)}" sandbox="allow-scripts allow-same-origin"></iframe>
             </div>
           `;
           document.body.appendChild(previewWindow);
           previewWindow.querySelector(".close-preview").addEventListener("click", () => previewWindow.remove());
+          console.log("Preview window appended to DOM");
+        } else {
+          console.error("No preview content generated");
         }
       } catch (error) {
         console.error("Gemini proxy error:", error);
@@ -167,7 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
           recognitionTimeout = setTimeout(() => recognition.stop(), 5000);
         } catch (e) {
           console.error("Failed to start recognition:", e);
-          alert("Microphone access denied or unavailable. Please check permissions and network.");
+          alert("Microphone access denied or unavailable. Check permissions and network.");
           micButton.classList.remove("listening");
           isRecognitionActive = false;
         }
