@@ -4,12 +4,13 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     const chatContainer = document.querySelector(".chat-list");
     const micButton = document.querySelector("#voice-input-button");
-    const textInput = document.querySelector("#text-input");
-    const textSubmit = document.querySelector("#text-submit");
     const historyBox = document.getElementById("history-box");
 
-    if (!chatContainer || !micButton || !textSubmit) {
-      console.error("Error: Required elements not found in the DOM.");
+    // Detailed error checking
+    if (!chatContainer) console.error("chatContainer (.chat-list) not found in DOM.");
+    if (!micButton) console.error("micButton (#voice-input-button) not found in DOM.");
+    if (!chatContainer || !micButton) {
+      console.error("Error: Required elements not found in the DOM. Aborting script.");
       return;
     }
 
@@ -20,8 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
       recognition.lang = "en-US";
       console.log("SpeechRecognition initialized successfully.");
     } else {
-      console.warn("Speech Recognition not supported. Using text input only.");
-      micButton.disabled = true;
+      console.warn("Speech Recognition not supported. Mic disabled.");
+      micButton.classList.add("disabled");
       micButton.title = "Speech not supported in this browser";
     }
 
@@ -204,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let errorMessage = "Speech recognition failed: ";
         switch (event.error) {
           case "network":
-            errorMessage += "Network issue. Check your connection or try text input.";
+            errorMessage += "Network issue. Check your connection.";
             break;
           case "not-allowed":
           case "service-not-allowed":
@@ -227,22 +228,5 @@ document.addEventListener("DOMContentLoaded", () => {
         clearTimeout(recognitionTimeout);
       };
     }
-
-    textSubmit.addEventListener("click", () => {
-      const message = textInput.value.trim();
-      if (message) {
-        const userMessageDiv = createMessageElement(message, "outgoing");
-        chatContainer.appendChild(userMessageDiv);
-        chatContainer.scrollTo(0, chatContainer.scrollHeight);
-        fetchGeminiResponse(message);
-        textInput.value = "";
-      }
-    });
-
-    textInput.addEventListener("keypress", (event) => {
-      if (event.key === "Enter") {
-        textSubmit.click();
-      }
-    });
   }, 100);
 });
